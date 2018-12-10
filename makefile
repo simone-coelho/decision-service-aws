@@ -68,10 +68,10 @@ run-decision:
 # Test the Node Decision Service
 test-decision:
 	@echo "activate with user 'a':"
-	@curl -d "@loadtest_service/activate.json" -X POST http://$(DECISION_HOST):$(DECISION_PORT)/rpc
+	@curl -d "@loadtest_service/json/activate.json" -X POST http://$(DECISION_HOST):$(DECISION_PORT)/rpc
 	@echo ""
 	@echo "get_variation with user 'a':"
-	@curl -d "@loadtest_service/get_variation.json" -X POST http://$(DECISION_HOST):$(DECISION_PORT)/rpc
+	@curl -d "@loadtest_service/json/get_variation.json" -X POST http://$(DECISION_HOST):$(DECISION_PORT)/rpc
 	@echo ""
 
 ###############################################################################
@@ -82,5 +82,5 @@ LOADTEST_CONTAINER = loadtest_service
 LOADTEST_DIR = loadtest_service
 LOADTEST_NETWORK = fullstack_alacart
 
-run-loadtest:
-	ab -T application/json -p loadtest_service/get_variation.json -c 10 -n 5000 http://localhost:9090/rpc
+run-ab:
+	ab -T application/json -p loadtest_service/json/get_variation.json -c 10 -n 5000 http://localhost:9090/rpc
