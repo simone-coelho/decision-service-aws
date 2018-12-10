@@ -18,7 +18,7 @@ Your terminal should display the running output of the load test.
 
 # Load testing an externally-hosted decision service
 
-Now you can run the load test:
+You can specify the decision service host and port using docker environment variables:
 
       make build-loadtest
       docker run -e "DECISION_SERVICE_HOST=www.myds.com" -e "DECISION_SERVICE_PORT=80" loadtest_service
