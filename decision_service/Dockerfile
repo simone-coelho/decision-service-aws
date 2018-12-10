@@ -5,6 +5,6 @@ COPY . /decision_service
 
 RUN npm install
 
-EXPOSE 9090
+EXPOSE 9090 1337
 
 CMD ["npm", "start"]

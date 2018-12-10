@@ -69,6 +69,8 @@ let config = {
   server: {
     // HTTP Server
     NODE_PORT: process.env.NODE_PORT || 9090,
+    // GRPC Server
+    GRPC_PORT: process.env.GRPC_PORT || '0.0.0.0:1337'
   },
 };
 

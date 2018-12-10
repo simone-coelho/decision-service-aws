@@ -15,8 +15,10 @@ const methods = require('./rpc/methods');
 const types = require('./types/types');
 const server_config = require('./configuration/config').server;
 const optimizely = require('./optimizely/optimizely_manager');
+const grpcServer = require('./grpc_server')
 
 let server = http.createServer(requestListener);
+const GRPC_PORT = server_config.GRPC_PORT
 const PORT = server_config.NODE_PORT;
 
 // Initialize and get the datafile on server start
@@ -173,3 +175,5 @@ function requestListener(request, response) {
 
 console.log(`Starting the server on port ${PORT}`);
 server.listen(PORT);
+
+grpcServer.startServer(GRPC_PORT);
