@@ -16,13 +16,9 @@ Then build and launch your docker containers:
 
 Your terminal should display the running output of the load test.
 
-# Running a load test locally
-
-Build and start the decision service:
-
-      make build-decision
-      make run-decision
+# Load testing an externally-hosted decision service
 
 Now you can run the load test:
 
-      make run-loadtest
+      make build-loadtest
+      docker run -e "DECISION_SERVICE_HOST=www.myds.com" -e "DECISION_SERVICE_PORT=80" loadtest_service
