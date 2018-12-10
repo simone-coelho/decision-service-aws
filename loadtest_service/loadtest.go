@@ -9,10 +9,10 @@ import (
   vegeta "github.com/tsenart/vegeta/lib"
 )
 
-const DELAY_IN_SECONDS = 5    
-const DECISION_PROTOCOL = "http"  
-const DECISION_HOST = "decision" 
-const DECISION_PORT = "9090"
+const DEFAULT_LOADTEST_DELAY = 5    
+const DEFAULT_DECISION_SERVICE_PROTOCOL = "http"  
+const DEFAULT_DECISION_SERVICE_HOST = "decision" 
+const DEFAULT_DECISION_SERVICE_PORT = "9090"
 
 type GlobalParams struct {
   StartupDelay time.Duration      // Wait this long before starting load tests
@@ -73,10 +73,10 @@ func main() {
 // Initialize and return a GlobalParams object
 func getGlobalParams() GlobalParams {
   return GlobalParams{
-    StartupDelay: DELAY_IN_SECONDS * time.Second,
-    ServiceProtocol: DECISION_PROTOCOL,
-    ServiceHost: DECISION_HOST,
-    ServicePort: DECISION_PORT,
+    StartupDelay: DEFAULT_LOADTEST_DELAY * time.Second,
+    ServiceProtocol: DEFAULT_DECISION_SERVICE_PROTOCOL,
+    ServiceHost: DEFAULT_DECISION_SERVICE_HOST,
+    ServicePort: DEFAULT_DECISION_SERVICE_PORT,
   }
 }
 
