@@ -13,8 +13,8 @@ services:
     image: loadtest_service
     environment:
       DECISION_SERVICE_PROTOCOL: http
-      DECISION_SERVICE_HOST: localhost
-      DECISION_SERVICE_PORT: 2468
+      DECISION_SERVICE_HOST: decision
+      DECISION_SERVICE_PORT: 9090
     deploy:
       replicas: 1
       restart_policy:
