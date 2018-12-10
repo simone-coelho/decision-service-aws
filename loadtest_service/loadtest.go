@@ -5,11 +5,15 @@ package main
 import (
   "fmt"
   "time"
-
+  "os"
   vegeta "github.com/tsenart/vegeta/lib"
 )
 
-const DEFAULT_LOADTEST_DELAY = 5    
+const DECISION_SERVICE_PROTOCOL_ENV = "DECISION_SERVICE_PROTOCOL"
+const DECISION_SERVICE_HOST_ENV = "DECISION_SERVICE_HOST"
+const DECISION_SERVICE_PORT_ENV = "DECISION_SERVICE_PORT"
+
+const DEFAULT_LOADTEST_DELAY = 5
 const DEFAULT_DECISION_SERVICE_PROTOCOL = "http"  
 const DEFAULT_DECISION_SERVICE_HOST = "decision" 
 const DEFAULT_DECISION_SERVICE_PORT = "9090"
@@ -72,12 +76,30 @@ func main() {
 
 // Initialize and return a GlobalParams object
 func getGlobalParams() GlobalParams {
-  return GlobalParams{
+  globalParams := GlobalParams{
     StartupDelay: DEFAULT_LOADTEST_DELAY * time.Second,
     ServiceProtocol: DEFAULT_DECISION_SERVICE_PROTOCOL,
     ServiceHost: DEFAULT_DECISION_SERVICE_HOST,
     ServicePort: DEFAULT_DECISION_SERVICE_PORT,
   }
+
+  protocolEnvValue := os.Getenv(DECISION_SERVICE_PROTOCOL_ENV)
+  if len(protocolEnvValue) > 0 {
+    globalParams.ServiceProtocol = protocolEnvValue
+  }
+
+  hostEnvValue := os.Getenv(DECISION_SERVICE_HOST_ENV)
+  if len(hostEnvValue) > 0 {
+    globalParams.ServiceHost = hostEnvValue
+  }
+
+  portEnvValue := os.Getenv(DECISION_SERVICE_PORT_ENV)
+  if len(portEnvValue) > 0 {
+    globalParams.ServicePort = portEnvValue
+  } 
+
+  return globalParams
+
 }
 
 // Use vegeta to run the load test as specified in the passed parameters
@@ -143,4 +165,3 @@ func displayTestResults(metrics vegeta.Metrics) {
     fmt.Printf("    %s\n", err)
   }
 }
-
