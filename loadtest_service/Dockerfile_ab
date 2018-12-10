@@ -1,0 +1,11 @@
+# A simple Apache Bench load test
+
+FROM alpine
+
+ENV TERM linux
+RUN apk --no-cache add apache2-utils
+
+WORKDIR /loadtest_service
+COPY . /loadtest_service
+
+CMD ["/usr/bin/ab", "-T","application/json", "-p","get_variation.json", "-c","1", "-n","1", "http://decision_service:9090/rpc"]

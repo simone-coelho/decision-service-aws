@@ -1,0 +1,11 @@
+# Logs
+*.log
+
+# Nodejs installs
+*node_modules*
+
+# Redis artifacts
+*.rdb
+
+# OS X Garbage files
+*.DS_Store
