@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package Optimizely;
 
-import "google/protobuf/any.proto";
-
 service DecisionService {
   rpc Activate(DecisionRequest) returns (DecisionResponse);
+  rpc GetVariation(DecisionRequest) returns (DecisionResponse);
+  rpc GetFeature(FeatureRequest) returns (FeatureResponse);
 }
 
 message DecisionResponse {
@@ -25,5 +25,5 @@ message FeatureRequest {
 }
 
 message FeatureResponse {
-  bool is_feature_enabled = 1;
+  bool is_enabled = 1;
 }
