@@ -12,17 +12,19 @@ import (
 const DECISION_SERVICE_PROTOCOL_ENV = "DECISION_SERVICE_PROTOCOL"
 const DECISION_SERVICE_HOST_ENV = "DECISION_SERVICE_HOST"
 const DECISION_SERVICE_PORT_ENV = "DECISION_SERVICE_PORT"
+const DEBUG_ENV = "DEBUG"
 
 const DEFAULT_LOADTEST_DELAY = 5
-const DEFAULT_DECISION_SERVICE_PROTOCOL = "http"  
-const DEFAULT_DECISION_SERVICE_HOST = "decision" 
+const DEFAULT_DECISION_SERVICE_PROTOCOL = "http"
+const DEFAULT_DECISION_SERVICE_HOST = "decision"
 const DEFAULT_DECISION_SERVICE_PORT = "9090"
 
 type GlobalParams struct {
   StartupDelay time.Duration      // Wait this long before starting load tests
   ServiceProtocol string          // The decision service protocol (e.g. http)
-  ServiceHost string              // The decision service host 
+  ServiceHost string              // The decision service host
   ServicePort string              // The decision service port
+  Debug bool
 }
 
 type LoadTestParams struct {
@@ -39,7 +41,6 @@ type RequestParams struct {
 }
 
 func main() {
-
   // Initialize the global parameters
   globalParams := getGlobalParams()
 
@@ -81,6 +82,7 @@ func getGlobalParams() GlobalParams {
     ServiceProtocol: DEFAULT_DECISION_SERVICE_PROTOCOL,
     ServiceHost: DEFAULT_DECISION_SERVICE_HOST,
     ServicePort: DEFAULT_DECISION_SERVICE_PORT,
+    Debug: false,
   }
 
   protocolEnvValue := os.Getenv(DECISION_SERVICE_PROTOCOL_ENV)
@@ -96,7 +98,12 @@ func getGlobalParams() GlobalParams {
   portEnvValue := os.Getenv(DECISION_SERVICE_PORT_ENV)
   if len(portEnvValue) > 0 {
     globalParams.ServicePort = portEnvValue
-  } 
+  }
+
+  debugEnvValue := os.Getenv(DEBUG_ENV)
+  if debugEnvValue == "1" {
+    globalParams.Debug = true
+  }
 
   return globalParams
 
@@ -112,13 +119,17 @@ func runLoadTest(testParams LoadTestParams, globalParams GlobalParams) vegeta.Me
   var targets []vegeta.Target
   for user_id := 0; user_id < testParams.NumUsers; user_id++ {
     for _, requestParams := range testParams.Requests {
+      requestBody := fmt.Sprintf(requestParams.Body, user_id)
+      if globalParams.Debug {
+        os.Stderr.WriteString(fmt.Sprintf("Request: %s\n", requestBody))
+      }
       targets = append(targets, vegeta.Target{
         Method: requestParams.Method,
         URL:    fmt.Sprintf("%s://%s:%s%s", globalParams.ServiceProtocol,
                                             globalParams.ServiceHost,
                                             globalParams.ServicePort,
                                             requestParams.Path),
-        Body:   []byte(fmt.Sprintf(requestParams.Body, user_id)),
+        Body:   []byte(requestBody),
       })
     }
   }
@@ -129,6 +140,10 @@ func runLoadTest(testParams LoadTestParams, globalParams GlobalParams) vegeta.Me
 
   var metrics vegeta.Metrics
   for res := range attacker.Attack(targeter, rate, testParams.Duration, "Decision service load test") {
+    if globalParams.Debug {
+      os.Stderr.WriteString(fmt.Sprintf("Response: %s\n", res.Body))
+    }
+
     metrics.Add(res)
   }
   metrics.Close()
@@ -150,7 +165,7 @@ func displayTestResults(metrics vegeta.Metrics) {
   fmt.Printf("  Requests: %d\n", metrics.Requests)
   fmt.Printf("  Duration: %s\n", metrics.Duration)
   fmt.Printf("  Rate: %f\n", metrics.Rate)
-  fmt.Printf("  Latency [Mean, 50, 95, 99]: %s %s %s %s\n", 
+  fmt.Printf("  Latency [Mean, 50, 95, 99]: %s %s %s %s\n",
             metrics.Latencies.Mean,
             metrics.Latencies.P50,
             metrics.Latencies.P95,
