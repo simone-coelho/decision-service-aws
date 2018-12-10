@@ -84,3 +84,6 @@ LOADTEST_NETWORK = fullstack_alacart
 
 run-ab:
 	ab -T application/json -p loadtest_service/json/get_variation.json -c 10 -n 5000 http://localhost:9090/rpc
+
+build-loadtest:
+	docker build -t $(LOADTEST_CONTAINER) $(LOADTEST_DIR)
