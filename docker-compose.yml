@@ -25,7 +25,7 @@ services:
     depends_on: 
       - decision
     environment:
-      - DECISION_SERVER=decision:9090
+      - DECISION_SERVER
       - DEBUG
     deploy:
       replicas: 20
