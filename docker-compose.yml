@@ -1,21 +1,27 @@
 version: "3"
 services:
-  decision:
-    # replace username/repo:tag with your name and image details
-    image: decision_service
+  datafile:
+    image: datafile_service
     deploy:
       replicas: 1
       restart_policy:
         condition: on-failure
-    ports:
-      - "9090:9090"
-      - "0.0.0.0:1337:1337"
+  decision:
+    image: decision_service
+    depends_on:
+      - datafile
+    environment:
+      - DATAFILE_SERVER=datafile:2222
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
   loadtest:
     image: loadtest_service
+    depends_on: 
+      - decision
     environment:
-      - DECISION_SERVICE_PROTOCOL
-      - DECISION_SERVICE_HOST
-      - DECISION_SERVICE_PORT
+      - DECISION_SERVER=decision:9090
       - DEBUG
     deploy:
       replicas: 1

@@ -1,11 +1,11 @@
 FROM node:11
 
-WORKDIR /decision_service
-COPY . /decision_service
+WORKDIR /datafile_service
+COPY . /datafile_service
 
 RUN rm -rf node_modules
 RUN npm install
 
-EXPOSE 9090 1337
+EXPOSE 2222
 
 CMD ["npm", "start"]

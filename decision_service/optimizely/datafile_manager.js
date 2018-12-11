@@ -26,8 +26,7 @@ const wsOptions = {
   WebSocket: WebSocket,
 };
 
-// let wsClient = new WebSocket(config.server.WEBSOCKET_SERVER, '', null);
-const wsClient = new ReconnectingWebSocket(config.server.WEBSOCKET_SERVER, [], wsOptions);
+const wsClient = new ReconnectingWebSocket('ws://' + config.server.DATAFILE_SERVER, [], wsOptions);
 
 wsClient.onopen = function() {
   console.log('Websocket client connected to datafile manager server.');
@@ -119,7 +118,7 @@ async function fetchFileSync(url) {
 async function fetchDatafile(datafileKey, dest) {
   try {
     let datafile = await fetchFileSync(
-        utils.placeHolder(config.sdk._SDK_URL_MANAGER, {SDK_KEY: datafileKey}));
+        utils.placeHolder('http://' + config.server.DATAFILE_SERVER + config.sdk._SDK_URL_PATH, {SDK_KEY: datafileKey}));
     if (datafile) {
       sdk.DATAFILE = datafile;
       sdk.DATAFILE_REVISION = sdk.DATAFILE.revision;

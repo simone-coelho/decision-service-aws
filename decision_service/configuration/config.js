@@ -32,7 +32,7 @@ let config = {
     // ******* No longer implemented *******
     _SDK_URL:  'https://cdn.optimizely.com/datafiles/${SDK_KEY}.json',
     // Use this constant for the endpoint to connect to the datafile manager
-    _SDK_URL_MANAGER: 'http://localhost:2222/datafile/json/${SDK_KEY}',
+    _SDK_URL_PATH: '/datafile/json/${SDK_KEY}',
 
     // Datafile settings
     DATAFILE_DIR: process.env.DATAFILE_DIR || 'datafiles/',
@@ -76,7 +76,7 @@ let config = {
     // GRPC Server
     GRPC_PORT: process.env.GRPC_PORT || '0.0.0.0:1337',
     // Websocket Server
-    WEBSOCKET_SERVER: process.env.WEBSOCKET_SERVER || 'ws://localhost:2222',
+    DATAFILE_SERVER: process.env.DATAFILE_SERVER || 'locahost:2222',
   },
 };
 

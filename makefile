@@ -8,8 +8,9 @@ DECISION_DIR = decision_service
 LOADTEST_SERVICE = $(SWARM_APP)_loadtest
 LOADTEST_CONTAINER = loadtest_service
 LOADTEST_DIR = loadtest_service
-DATAFILE_DIR = $(DECISION_DIR)/datafile_manager
-
+DATAFILE_SERVICE = $(SWARM_APP)_datafile
+DATAFILE_CONTAINER = datafile_service
+DATAFILE_DIR = datafile_service
 
 ### Starting and stopping the dockerized load test
 
@@ -20,6 +21,7 @@ start-swarm:
 
 # Build all containers
 build-containers:
+	docker build -t $(DATAFILE_CONTAINER) $(DATAFILE_DIR)
 	docker build -t $(DECISION_CONTAINER) $(DECISION_DIR) 
 	docker build -t $(LOADTEST_CONTAINER) $(LOADTEST_DIR) 
 
@@ -41,6 +43,10 @@ stop-swarm:
 
 
 # Get the loadtest results
+datafile-logs:
+	docker service logs --follow $(DATAFILE_SERVICE)
+
+# Get the loadtest results
 loadtest-logs:
 	docker service logs --follow $(LOADTEST_SERVICE)
 
@@ -50,7 +56,7 @@ decision-logs:
 
 
 ###############################################################################
-# Decision Service
+# Decision Service (local)
 ###############################################################################
 
 DECISION_PORT = 9090

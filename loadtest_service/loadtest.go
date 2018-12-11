@@ -9,21 +9,15 @@ import (
   vegeta "github.com/tsenart/vegeta/lib"
 )
 
-const DECISION_SERVICE_PROTOCOL_ENV = "DECISION_SERVICE_PROTOCOL"
-const DECISION_SERVICE_HOST_ENV = "DECISION_SERVICE_HOST"
-const DECISION_SERVICE_PORT_ENV = "DECISION_SERVICE_PORT"
+const DECISION_SERVER_ENV = "DECISION_SERVER"
 const DEBUG_ENV = "DEBUG"
 
 const DEFAULT_LOADTEST_DELAY = 5
-const DEFAULT_DECISION_SERVICE_PROTOCOL = "http"
-const DEFAULT_DECISION_SERVICE_HOST = "decision"
-const DEFAULT_DECISION_SERVICE_PORT = "9090"
+const DEFAULT_DECISION_SERVER = "localhost:9090"
 
 type GlobalParams struct {
   StartupDelay time.Duration      // Wait this long before starting load tests
-  ServiceProtocol string          // The decision service protocol (e.g. http)
-  ServiceHost string              // The decision service host
-  ServicePort string              // The decision service port
+  TargetServer string             // The decision service protocol (e.g. http)
   Debug bool
 }
 
@@ -54,7 +48,7 @@ func main() {
                   RequestParams{
                     Method: "POST",
                     Path: "/rpc",
-                    Body: "{ \"get_variation\": { \"experiment_key\":\"simple_test\", \"user_id\":\"%d\", \"attributes\": {\"test_user\":\"true\"} } }",
+                    Body: "{ \"get_variation\": { \"datafile_key\":\"DjJKKrG8NnRhSLRVvX8VS8\", \"experiment_key\":\"simple_test\", \"user_id\":\"%d\", \"attributes\": {\"test_user\":\"true\"} } }",
                   },
     },
     NumUsers: 50,
@@ -79,25 +73,13 @@ func main() {
 func getGlobalParams() GlobalParams {
   globalParams := GlobalParams{
     StartupDelay: DEFAULT_LOADTEST_DELAY * time.Second,
-    ServiceProtocol: DEFAULT_DECISION_SERVICE_PROTOCOL,
-    ServiceHost: DEFAULT_DECISION_SERVICE_HOST,
-    ServicePort: DEFAULT_DECISION_SERVICE_PORT,
+    TargetServer: DEFAULT_DECISION_SERVER,
     Debug: false,
   }
 
-  protocolEnvValue := os.Getenv(DECISION_SERVICE_PROTOCOL_ENV)
-  if len(protocolEnvValue) > 0 {
-    globalParams.ServiceProtocol = protocolEnvValue
-  }
-
-  hostEnvValue := os.Getenv(DECISION_SERVICE_HOST_ENV)
-  if len(hostEnvValue) > 0 {
-    globalParams.ServiceHost = hostEnvValue
-  }
-
-  portEnvValue := os.Getenv(DECISION_SERVICE_PORT_ENV)
-  if len(portEnvValue) > 0 {
-    globalParams.ServicePort = portEnvValue
+  targetServerValue := os.Getenv(DECISION_SERVER_ENV)
+  if len(targetServerValue) > 0 {
+    globalParams.TargetServer = targetServerValue
   }
 
   debugEnvValue := os.Getenv(DEBUG_ENV)
@@ -125,10 +107,7 @@ func runLoadTest(testParams LoadTestParams, globalParams GlobalParams) vegeta.Me
       }
       targets = append(targets, vegeta.Target{
         Method: requestParams.Method,
-        URL:    fmt.Sprintf("%s://%s:%s%s", globalParams.ServiceProtocol,
-                                            globalParams.ServiceHost,
-                                            globalParams.ServicePort,
-                                            requestParams.Path),
+        URL:    fmt.Sprintf("http://%s%s", globalParams.TargetServer, requestParams.Path),
         Body:   []byte(requestBody),
       })
     }
@@ -154,7 +133,7 @@ func runLoadTest(testParams LoadTestParams, globalParams GlobalParams) vegeta.Me
 
 // Display the test parameters
 func displayTestParameters(testParams LoadTestParams, globalParams GlobalParams) {
-  fmt.Printf("  Service: %s://%s:%s\n", globalParams.ServiceProtocol, globalParams.ServiceHost, globalParams.ServicePort)
+  fmt.Printf("  Service: http://%s\n", globalParams.TargetServer)
   fmt.Printf("  Number of users: %d\n", testParams.NumUsers)
   fmt.Printf("  Target rate: %d/s\n", testParams.RequestsPerSecond)
   fmt.Printf("  Target duration: %s\n", testParams.Duration)
