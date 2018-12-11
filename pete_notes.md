@@ -15,9 +15,12 @@ My goal was to split Simone's decision services into multiple services so that i
 - Add a docker image for running load tests
 - Add docker-compose.yml to run these containers in the same network
 - Package up load tests into a single script with clear output (used a golang script + vegeta)
-- [todo] upload images to dockerhub
-- [todo] deploy to aws with cloudformation
-- [todo] update to the latest version of simone's decision service
+- updated to the latest version of simone's decision service
+- deployed to aws with cloudformation
+- [todo] figure out why loadtests are getting network errors
+- [todo] update readme and docs
+- [todo] scale event dispatcher
+- [todo] scale userprofile servicex
 
 # Load test times
 
