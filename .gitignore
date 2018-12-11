@@ -12,3 +12,6 @@
 
 # Intellij files
 *.idea*
+
+# Don't commit your private key :)
+aws*
