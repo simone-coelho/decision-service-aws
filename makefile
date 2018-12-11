@@ -18,7 +18,7 @@ DATAFILE_DIR = datafile_service
 
 SSH_KEY_PATH = aws/fullstack-service-keypair.pem
 TUNNEL_PORT = localhost:2374
-MANAGER_PUBLIC_DNS = ec2-54-234-83-58.compute-1.amazonaws.com
+MANAGER_PUBLIC_DNS = ec2-18-209-245-199.compute-1.amazonaws.com
 
 # modify this variable to run docker commands remotely via ssh
 # Remote execution requires running "tunnel" first
@@ -75,7 +75,7 @@ decision-logs:
 # Initiate Docker SSH Tunnel to cluster
 tunnel:
 	@echo "To initiate your SSH tunnel, run the following command:"
-	@echo "ssh -i $(SSH_KEY_PATH) -NL $(TUNNEL_PORT):/var/run/docker.sock docker@$(MANAGER_PUBLIC_DNS)"
+	@echo "ssh -i $(SSH_KEY_PATH) -NL $(TUNNEL_PORT):/var/run/docker.sock docker@$(MANAGER_PUBLIC_DNS) &"
 
 ssh:
 	ssh -i $(SSH_KEY_PATH) docker@$(MANAGER_PUBLIC_DNS)
