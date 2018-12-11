@@ -12,7 +12,7 @@ import (
 const DECISION_SERVER_ENV = "DECISION_SERVER"
 const DEBUG_ENV = "DEBUG"
 
-const DEFAULT_LOADTEST_DELAY = 5
+const DEFAULT_LOADTEST_DELAY = 60
 const DEFAULT_DECISION_SERVER = "localhost:9090"
 
 type GlobalParams struct {
@@ -52,8 +52,8 @@ func main() {
                   },
     },
     NumUsers: 50,
-    RequestsPerSecond: 10,
-    Duration: 10 * time.Second,
+    RequestsPerSecond: 100,
+    Duration: 60 * time.Second,
   }
 
   // Print the test parameters
