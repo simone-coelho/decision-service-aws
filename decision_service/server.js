@@ -13,21 +13,12 @@ const http = require('http');
 const url = require('url');
 const methods = require('./rpc/methods');
 const types = require('./types/types');
-const server_config = require('./configuration/config').server;
-const optimizely = require('./optimizely/optimizely_manager');
+const server_config = require('./configuration/config');
+const PORT = server_config.server.NODE_PORT;
 const grpcServer = require('./grpc_server')
-
-let server = http.createServer(requestListener);
 const GRPC_PORT = server_config.GRPC_PORT
-const PORT = server_config.NODE_PORT;
+http.createServer(requestListener).listen(PORT);
 
-// Initialize and get the datafile on server start
-let appOptlyInstance;
-optimizely.getInstance().then(optly => {
-  appOptlyInstance = optly;
-}).catch(function() {
-  console.error('Unable to instantiate the Optimizely client');
-});
 
 let routes = {
   /**
@@ -173,7 +164,5 @@ function requestListener(request, response) {
   });
 }
 
-console.log(`Starting the server on port ${PORT}`);
-server.listen(PORT);
-
 grpcServer.startServer(GRPC_PORT);
+console.log(`Starting the server on port ${PORT}`);
