@@ -9,3 +9,6 @@
 
 # OS X Garbage files
 *.DS_Store
+
+# Intellij files
+*.idea*

@@ -1,5 +1,15 @@
+/*
+ * Copyright (c) 2018, Simone A. Coelho - Optimizely
+ *
+ * Module:          ds_rpc
+ * File Name:       methods.js
+ * Last Modified:   12/9/18 2:54 AM
+ *
+ */
+
 'use strict';
 
+const db = require('../database/db');
 const validate = require('../types/json_validator');
 const optimizely = require('../optimizely/optimizely_manager');
 
@@ -36,7 +46,7 @@ let methods = {
           throw new Error(validate.ajv.errorsText(validate.experiments.errors));
         }
 
-        optimizely.getInstance().then(optly => {
+        optimizely.getInstance(expObj.datafile_key, false).then(optly => {
           let result = optimizely.activateExperiment(expObj);
           resolve(result);
         }).catch(function() {
@@ -71,7 +81,7 @@ let methods = {
           throw new Error(validate.ajv.errorsText(validate.track.errors));
         }
 
-        optimizely.getInstance().then(optly => {
+        optimizely.getInstance(trackObj.datafile_key).then(optly => {
           optly.track(trackObj.event_key,
               trackObj.user_id,
               trackObj.attributes,
@@ -111,7 +121,7 @@ let methods = {
               validate.ajv.errorsText(validate.feature_test.errors));
         }
 
-        optimizely.getInstance().then(optly => {
+        optimizely.getInstance(featuresObj.datafile_key).then(optly => {
           featuresObj.is_enabled = optly.isFeatureEnabled(
               featuresObj.feature_key,
               featuresObj.user_id,
@@ -225,7 +235,7 @@ let methods = {
           throw new Error(validate.ajv.errorsText(validate.get_variation.errors));
         }
 
-        optimizely.getInstance().then(optly => {
+        optimizely.getInstance(expObj.datafile_key).then(optly => {
           expObj.variation_key = optly.getVariation(expObj.experiment_key,
               expObj.user_id,
               expObj.attributes);
@@ -264,7 +274,7 @@ let methods = {
           throw new Error(validate.ajv.errorsText(validate.set_variation.errors));
         }
 
-        optimizely.getInstance().then(optly => {
+        optimizely.getInstance(expObj.datafile_key).then(optly => {
           expObj.variation_forced = optly.setForcedVariation(expObj.experiment_key,
               expObj.user_id,
               expObj.variation_key);
@@ -304,7 +314,7 @@ let methods = {
           throw new Error(validate.ajv.errorsText(validate.get_variation.errors));
         }
 
-        optimizely.getInstance().then(optly => {
+        optimizely.getInstance(expObj.datafile_key).then(optly => {
           expObj.variation_key = optly.getForcedVariation(expObj.experiment_key,
               expObj.user_id);
 
@@ -346,7 +356,7 @@ let methods = {
           throw new Error(validate.ajv.errorsText(validate.enabled_features.errors));
         }
 
-        optimizely.getInstance().then(optly => {
+        optimizely.getInstance(featuresObj.datafile_key).then(optly => {
           featuresObj.features_list = optly.getEnabledFeatures(featuresObj.user_id,
               featuresObj.attributes);
 

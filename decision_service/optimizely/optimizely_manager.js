@@ -3,7 +3,7 @@
  *
  * Module:          ds_rpc
  * File Name:       optimizely_manager.js
- * Last Modified:   11/16/18 9:09 PM
+ * Last Modified:   12/9/18 2:48 AM
  *
  */
 
@@ -14,9 +14,12 @@
  * Manages the optimizely instance.
  */
 const optimizely = require('@optimizely/optimizely-sdk');
+
 const config = require('../configuration/config');
 const sdk = config.sdk;
+const database = require('../database/database');
 const datafileManager = require('./datafile_manager');
+const instanceCache = require('../database/db');
 
 // Register the logger with the sdk.
 const defaultLogger = require('@optimizely/optimizely-sdk/lib/plugins/logger');
@@ -25,8 +28,13 @@ const LOG_LEVEL = require(
 const NOTIFICATION_TYPES = require(
     '@optimizely/optimizely-sdk/lib/utils/enums').NOTIFICATION_TYPES;
 
+// Used to work around Async/Sync difference in User Profiles.
+let activeUserId = '';
+let cachedUserProfileMap = '';
+
 // Possible future use in saving user state.
 let experimentActivated = false;
+let userProfileIsActive = false;
 
 // Singleton instance of the optimizely object.
 let optlyInstance;
@@ -34,22 +42,30 @@ let optlyInstance;
 /**
  * Notification listener for new datafile download updates.
  */
-datafileManager.on('updated_datafile', function(datafile, prevRev, newRev) {
-    reInitializeClient(datafile);
-    console.log(
-        'Updated datafile: ' + sdk.DATAFILE_URL + ' from revision ' +
-        prevRev + ' to revision ' + newRev);
+datafileManager.on('updated_datafile_keys', function(datafileKeys) {
+  for (const key of datafileKeys) {
+    console.log('Start - Reinitialize client with updated datafile: ' + key);
+    reInitializeClient(key, true);
+  }
+});
+
+datafileManager.on('updated_datafile', function(datafile, key) {
+  console.log('Start - Reinitialize client with updated datafile: ' + key);
+  reInitializeClient(key, true, datafile);
 });
 
 /**
  * Reinitialize the Optimizely client instance
  *
- * @param {Object} datafile
- *   The project configuration datafile used to instantiate the sdk.
+ * @param {Object} datafileKey
+ *   The project configuration datafile key used to instantiate the sdk.
+ * @param fullRefresh
+ * @param datafile
  */
-function reInitializeClient(datafile) {
+function reInitializeClient(datafileKey, fullRefresh, datafile) {
   optlyInstance = null;
-  _getInstance(datafile);
+  module.exports.getInstance(datafileKey, fullRefresh, datafile);
+  console.log('Completed - Reinitialize client with updated datafile: ' + datafileKey);
 }
 
 module.exports = {
@@ -59,22 +75,43 @@ module.exports = {
    * @return {Object}
    *   The optimizely sdk client instance
    */
-  async getInstance(datafile) {
+  async getInstance(datafileKey, fullRefresh, datafile) {
     // Check if we have a active datafile or if we are forced to re-fetch it.
     let instance = null;
+    let cachedInstance = null;
+    let newDatafile = null;
 
-    if (!sdk.DATAFILE || datafile) {
-      await getDataFile(sdk.DATAFILE_URL).then((fetchedDatafile) => {
-        instance = _getInstance(fetchedDatafile);
-      });
+    if ((fullRefresh) || (datafile)) {
+      instanceCache.optlyClients.delete(datafileKey);
     } else {
-      instance = _getInstance(sdk.DATAFILE);
+      cachedInstance = instanceCache.optlyClients.fetch(datafileKey);
+    }
+
+    if (!cachedInstance) {
+      if (datafile) {
+        newDatafile = datafile;
+      } else {
+        newDatafile = await getDataFile(datafileKey);
+      }
+
+      if (!newDatafile) {
+        throw new Error('Unable to retrieve the SDK datafile: ' + datafileKey);
+      }
+
+      instance = _getInstance(newDatafile);
+      let storedInstance = {};
+      storedInstance.id = datafileKey;
+      storedInstance.instance = instance;
+      instanceCache.optlyClients.save(storedInstance);
+    } else {
+      instance = cachedInstance.instance;
     }
 
     if (!instance) {
       throw new Error('Unable to instantiate the Optimizely client');
     }
 
+    optlyInstance = instance;
     return instance;
   },
 
@@ -88,8 +125,11 @@ module.exports = {
    *   Experiment object with assigned variation.
    */
   async activateExperiment(expObj) {
-    if (!optlyInstance) {
-      await getInstance();
+    activeUserId = expObj.user_id;
+    if (userProfileIsActive) {
+      await getUserProfileMap(activeUserId).then(userProfileMap => {
+        cachedUserProfileMap = userProfileMap;
+      });
     }
 
     expObj.variation_key = optlyInstance.activate(expObj.experiment_key,
@@ -115,6 +155,22 @@ module.exports = {
 };
 
 /**
+ * Returns the user profile service if the database is configured.
+ *
+ * @param dbConfig
+ * @returns {object}
+ * @private
+ */
+function _getUserProfileService(dbConfig) {
+  if ((config.db.REDIS_PATH) && (config.db.REDIS_PATH !== '')) {
+    return {};
+  } else {
+    userProfileIsActive = true;
+    return userProfileService;
+  }
+}
+
+/**
  * Creates the sdk client instance.
  *
  * @param datafile
@@ -124,22 +180,20 @@ module.exports = {
  * @private
  */
 function _getInstance(datafile) {
-  if (!optlyInstance) {
-    optlyInstance = optimizely.createInstance({
-      datafile: datafile,
-      // This should be set to false if we modify the activeDatafile in any way.
-      skipJSONValidation: true,
-      logger: defaultLogger.createLogger({
-        logLevel: LOG_LEVEL.INFO,
-      }),
-    });
+  optlyInstance = optimizely.createInstance({
+    datafile,
+    _getUserProfileService,
+    // This should be set to false if we modify the activeDatafile in any way.
+    skipJSONValidation: true,
+    logger: defaultLogger.createLogger({
+      logLevel: LOG_LEVEL.ERROR,
+    }),
+  });
 
-    registerListeners(optlyInstance);
-  }
+  registerListeners(optlyInstance);
 
   return optlyInstance;
 }
-
 
 /**
  * Retrieves the project configuration datafile.
@@ -150,9 +204,59 @@ function _getInstance(datafile) {
  *   Contains the downloaded datafile JSON.
  */
 async function getDataFile(url) {
-  await datafileManager.downloadFileSync(url);
-  return sdk.DATAFILE;
+  return await datafileManager.downloadFileSync(url);
 }
+
+/**
+ * Retrieves the user profile from the data store.
+ *
+ * @param userId
+ *   The User ID used to activate an experiment or feature.
+ * @returns {Promise<*>}
+ *   Contains the user profile map object.
+ */
+async function getUserProfileMap(userId) {
+  try {
+    let result = await database.dbClient.get(userId);
+    let userProfileMap = null;
+    if (result) {
+      userProfileMap = JSON.parse(result);
+    }
+
+    return userProfileMap;
+  } catch (err) {
+    console.error('Get user profile - ' + err);
+  }
+}
+
+/**
+ * Saves the user profile map to the data store.
+ *
+ * @param {object} userProfileMap
+ *   The updated user profile map object.
+ * @returns {Promise<void>}
+ */
+async function saveUserProfileMap(userProfileMap) {
+  try {
+    await database.dbClient.set(activeUserId,
+        JSON.stringify(userProfileMap));
+  } catch (err) {
+    console.error('Save user profile - ' + err);
+  }
+}
+
+/**
+ * Register required functions with the sdk to load and save the user profile.
+ */
+let userProfileService = {
+  lookup: function(userId) {
+    return cachedUserProfileMap;
+  },
+  save: function(userProfileMap) {
+    // noinspection JSIgnoredPromiseFromCall
+    saveUserProfileMap(userProfileMap);
+  },
+};
 
 /**
  *  Register notification Listeners.

@@ -3,7 +3,7 @@
  *
  * Module:          ds_rpc
  * File Name:       config.js
- * Last Modified:   11/17/18 2:35 PM
+ * Last Modified:   12/8/18 2:07 PM
  *
  */
 
@@ -20,16 +20,19 @@ let config = {
     activation_interval: 0,
 
     // Using Project ID
-    //PROJECT_ID: process.env.PROJECT_ID || '12101591721',
-    //SDK_URL_ID: process.env.SDK_URL_ID ||
-    //    'https://cdn.optimizely.com/json/12101591721.json',
-    //_SDK_URL_ID: 'https://cdn.optimizely.com/json/${PROJECT_ID}.json',
+    PROJECT_ID: process.env.PROJECT_ID || '12101591721',
+    SDK_URL_ID: process.env.SDK_URL_ID ||
+        'https://cdn.optimizely.com/json/12101591721.json',
+    _SDK_URL_ID: 'https://cdn.optimizely.com/json/${PROJECT_ID}.json',
 
     // Using SDK Key
-    SDK_KEY: process.env.SDK_KEY || 'DjJKKrG8NnRhSLRVvX8VS8',
-    //SDK_URL: process.env.SDK_URL ||
-    //    'https://cdn.optimizely.com/datafiles/L7omXhmSV2Qa1DTbW2JeVB.json',
+    SDK_KEY: process.env.SDK_KEY || 'L7omXhmSV2Qa1DTbW2JeVB',
+    SDK_URL: process.env.SDK_URL ||
+        'https://cdn.optimizely.com/datafiles/L7omXhmSV2Qa1DTbW2JeVB.json',
+    // ******* No longer implemented *******
     _SDK_URL:  'https://cdn.optimizely.com/datafiles/${SDK_KEY}.json',
+    // Use this constant for the endpoint to connect to the datafile manager
+    _SDK_URL_MANAGER: 'http://localhost:2222/datafile/json/${SDK_KEY}',
 
     // Datafile settings
     DATAFILE_DIR: process.env.DATAFILE_DIR || 'datafiles/',
@@ -39,18 +42,14 @@ let config = {
       return utils.placeHolder(this._SDK_URL,
           {SDK_KEY: this.SDK_KEY});
     },
-    // get DATAFILE_URL_ID() {
-    //   return utils.placeHolder(this._SDK_URL_ID,
-    //       {SDK_KEY: this.sdk.SDK_KEY});
-    // },
+    get DATAFILE_URL_ID() {
+      return utils.placeHolder(this._SDK_URL_ID,
+          {SDK_KEY: this.sdk.SDK_KEY});
+    },
 
     // Active datafile
     DATAFILE: null,
     DATAFILE_REVISION: 0,
-
-    // User profile service config
-    // Set to null if you're not using a user profile service
-    USER_PROFILE_SERVICE: null,
 
     // Datafile update interval currently defaults to 15 minutes. Polling fir updated
     // datafiles will occur at this "cron" interval.
@@ -62,7 +61,12 @@ let config = {
   },
   db: {
     // Database
-    REDIS_PATH: process.env.REDIS_PATH || '127.0.0.1',
+
+    // *Comment the following line to enable the user profile.
+    REDIS_PATH: '',
+    // *Uncomment the following  line to enable the user profile.
+    // REDIS_PATH: process.env.REDIS_PATH || '127.0.0.1',
+    //
     REDIS_PORT: process.env.REDIS_PORT || '6379',
     REDIS_AUTH: process.env.REDIS_AUTH || '',
   },
@@ -70,7 +74,9 @@ let config = {
     // HTTP Server
     NODE_PORT: process.env.NODE_PORT || 9090,
     // GRPC Server
-    GRPC_PORT: process.env.GRPC_PORT || '0.0.0.0:1337'
+    GRPC_PORT: process.env.GRPC_PORT || '0.0.0.0:1337',
+    // Websocket Server
+    WEBSOCKET_SERVER: process.env.WEBSOCKET_SERVER || 'ws://localhost:2222',
   },
 };
 

@@ -8,6 +8,7 @@ DECISION_DIR = decision_service
 LOADTEST_SERVICE = $(SWARM_APP)_loadtest
 LOADTEST_CONTAINER = loadtest_service
 LOADTEST_DIR = loadtest_service
+DATAFILE_DIR = $(DECISION_DIR)/datafile_manager
 
 
 ### Starting and stopping the dockerized load test
@@ -52,7 +53,6 @@ decision-logs:
 # Decision Service
 ###############################################################################
 
-DECISION_DIR = decision_service
 DECISION_PORT = 9090
 DECISION_HOST = localhost
 
@@ -72,6 +72,28 @@ test-decision:
 	@echo ""
 	@echo "get_variation with user 'a':"
 	@curl -d "@loadtest_service/json/get_variation.json" -X POST http://$(DECISION_HOST):$(DECISION_PORT)/rpc
+	@echo ""
+
+###############################################################################
+# Datafile Service
+###############################################################################
+
+DATAFILE_PORT = 2222
+DATAFILE_HOST = localhost
+
+# Install the Node Decision Service
+build-datafile:
+	cd $(DATAFILE_DIR); npm install
+
+# Start the Node Decision Service
+# https://github.com/optimizely/decision-service
+run-datafile:
+	cd $(DATAFILE_DIR); npm start
+
+# Test the Node Decision Service
+test-datafile:
+	@echo "Requesting datafile DjJKKrG8NnRhSLRVvX8VS8:"
+	@curl http://$(DATAFILE_HOST):$(DATAFILE_PORT)/datafile/json/DjJKKrG8NnRhSLRVvX8VS8
 	@echo ""
 
 ###############################################################################

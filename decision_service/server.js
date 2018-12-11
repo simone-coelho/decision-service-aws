@@ -3,7 +3,7 @@
  *
  * Module:          ds_rpc
  * File Name:       server.js
- * Last Modified:   11/17/18 2:12 PM
+ * Last Modified:   12/9/18 3:12 AM
  *
  */
 
@@ -29,7 +29,6 @@ optimizely.getInstance().then(optly => {
   console.error('Unable to instantiate the Optimizely client');
 });
 
-
 let routes = {
   /**
    * Defines the different url paths that our application will respond to. This is
@@ -46,7 +45,7 @@ let routes = {
       let _json = JSON.parse(body); // might throw error
       let keys = Object.keys(_json);
       let promiseArr = [];
-
+      //console.log('Got to rpc');
       if (!body) {
         response.statusCode = 400;
         //noinspection
@@ -72,7 +71,7 @@ let routes = {
       }
 
       Promise.all(promiseArr).then(iter => {
-        console.log(iter);
+        //console.log(iter);
         let response = {};
         iter.forEach((val, index) => {
           response[keys[index]] = val;
@@ -98,11 +97,12 @@ let routes = {
     return new Promise(resolve => {
       let type;
       let method = {};
+      console.log('Got to describe');
 
       // set types
       type = types;
 
-      //set methods
+      // set methods
       for (let m in methods) {
         method[m] = JSON.parse(JSON.stringify(methods[m]));
       }
