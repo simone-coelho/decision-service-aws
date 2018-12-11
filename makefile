@@ -12,31 +12,46 @@ DATAFILE_SERVICE = $(SWARM_APP)_datafile
 DATAFILE_CONTAINER = datafile_service
 DATAFILE_DIR = datafile_service
 
+
+### Docker Config
+
+
+SSH_KEY_PATH = aws/fullstack-service-keypair.pem
+TUNNEL_PORT = localhost:2374
+MANAGER_PUBLIC_DNS = ec2-54-234-83-58.compute-1.amazonaws.com
+
+# modify this variable to run docker commands remotely via ssh
+# Remote execution requires running "tunnel" first
+DOCKER = docker -H $(TUNNEL_PORT) # Use this command for remote execution
+# DOCKER = docker 	 			  # Use this command for local execution
+
+
+
 ### Starting and stopping the dockerized load test
 
 
 # Run this command once to initialize a docker swarm
 start-swarm:
-	docker swarm init
+	$(DOCKER) swarm init
 
 # Build all containers
 build-containers:
-	docker build -t $(DATAFILE_CONTAINER) $(DATAFILE_DIR)
-	docker build -t $(DECISION_CONTAINER) $(DECISION_DIR) 
-	docker build -t $(LOADTEST_CONTAINER) $(LOADTEST_DIR) 
+	$(DOCKER) build -t $(DATAFILE_CONTAINER) $(DATAFILE_DIR)
+	$(DOCKER) build -t $(DECISION_CONTAINER) $(DECISION_DIR) 
+	$(DOCKER) build -t $(LOADTEST_CONTAINER) $(LOADTEST_DIR) 
 
 # Deploy the services described in docker-compose
-run: build-containers
-	docker stack deploy -c docker-compose.yml $(SWARM_APP)
-	docker service logs --follow $(LOADTEST_SERVICE)
+run:
+	$(DOCKER) stack deploy -c docker-compose.yml $(SWARM_APP)
+	$(DOCKER) service logs --follow $(LOADTEST_SERVICE)
 
 # Stop the services described in docker-compose
 stop:
-	docker stack rm $(SWARM_APP)
+	$(DOCKER) stack rm $(SWARM_APP)
 
 # Leave the docker swarm (and stop it)
 stop-swarm:
-	docker swarm leave --force
+	$(DOCKER) swarm leave --force
 
 
 ### Logs
@@ -44,15 +59,25 @@ stop-swarm:
 
 # Get the loadtest results
 datafile-logs:
-	docker service logs --follow $(DATAFILE_SERVICE)
+	$(DOCKER) service logs --follow $(DATAFILE_SERVICE)
 
 # Get the loadtest results
 loadtest-logs:
-	docker service logs --follow $(LOADTEST_SERVICE)
+	$(DOCKER) service logs --follow $(LOADTEST_SERVICE)
 
 # Follow the decision service logs
 decision-logs:
-	docker service logs --follow --tail 20 $(DECISION_SERVICE)
+	$(DOCKER) service logs --follow --tail 20 $(DECISION_SERVICE)
+
+
+### Cluster management
+
+# Initiate Docker SSH Tunnel to cluster
+tunnel:
+	ssh -i $(SSH_KEY_PATH) -NL $(TUNNEL_PORT):/var/run/docker.sock docker@$(MANAGER_PUBLIC_DNS); echo "done"
+
+ssh:
+	ssh -i $(SSH_KEY_PATH) docker@$(MANAGER_PUBLIC_DNS)
 
 
 ###############################################################################
@@ -114,4 +139,4 @@ run-ab:
 	ab -T application/json -p loadtest_service/json/get_variation.json -c 10 -n 5000 http://localhost:9090/rpc
 
 build-loadtest:
-	docker build -t $(LOADTEST_CONTAINER) $(LOADTEST_DIR)
+	$(DOCKER) build -t $(LOADTEST_CONTAINER) $(LOADTEST_DIR)
