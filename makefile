@@ -74,7 +74,8 @@ decision-logs:
 
 # Initiate Docker SSH Tunnel to cluster
 tunnel:
-	ssh -i $(SSH_KEY_PATH) -NL $(TUNNEL_PORT):/var/run/docker.sock docker@$(MANAGER_PUBLIC_DNS); echo "done"
+	@echo "To initiate your SSH tunnel, run the following command:"
+	@echo "ssh -i $(SSH_KEY_PATH) -NL $(TUNNEL_PORT):/var/run/docker.sock docker@$(MANAGER_PUBLIC_DNS)"
 
 ssh:
 	ssh -i $(SSH_KEY_PATH) docker@$(MANAGER_PUBLIC_DNS)
