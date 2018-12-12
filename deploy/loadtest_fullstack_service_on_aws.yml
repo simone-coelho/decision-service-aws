@@ -2,8 +2,6 @@ version: "3"
 services:
   datafile:
     image: datafile_service
-    ports:
-      - "2222:2222"
     deploy:
       replicas: 1
       restart_policy:
@@ -14,11 +12,8 @@ services:
       - datafile
     environment:
       - DATAFILE_SERVER=datafile:2222
-    ports:
-      - "9090:9090"
-      - "1337:1337"
     deploy:
-      replicas: 3
+      replicas: 1
       restart_policy:
         condition: on-failure
   loadtest:
@@ -26,14 +21,15 @@ services:
     depends_on: 
       - decision
     environment:
-      - DECISION_SERVER
       - DEBUG
-      - RATE
-      - LOADTEST_DURATION_SEC
-      - TEST_NAME
-      - STARTUP_DELAY=0
+      - DURATION=120
+      - NUM_USERS=1000
+      - RATE=25
+      - STARTUP_DELAY=120
+      - TARGET_SERVER=decision:9090
+      - TEST_NAME=loadtest_fullstack_service_on_aws
     deploy:
-      replicas: 20
+      replicas: 14
       restart_policy:
         condition: on-failure
     command: go run loadtest

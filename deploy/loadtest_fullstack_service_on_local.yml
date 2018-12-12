@@ -2,8 +2,6 @@ version: "3"
 services:
   datafile:
     image: datafile_service
-    ports:
-      - "2222:2222"
     deploy:
       replicas: 1
       restart_policy:
@@ -14,8 +12,6 @@ services:
       - datafile
     environment:
       - DATAFILE_SERVER=datafile:2222
-    ports:
-      - "9090:9090"
     deploy:
       replicas: 1
       restart_policy:
@@ -25,8 +21,13 @@ services:
     depends_on: 
       - decision
     environment:
-      - DECISION_SERVER=decision:9090
       - DEBUG
+      - DURATION=10
+      - NUM_USERS=50
+      - RATE=25
+      - STARTUP_DELAY=5
+      - TARGET_SERVER=decision:9090
+      - TEST_NAME=loadtest_fullstack_service_on_local
     deploy:
       replicas: 1
       restart_policy:
