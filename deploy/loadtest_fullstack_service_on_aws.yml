@@ -29,7 +29,7 @@ services:
       - TARGET_SERVER=decision:9090
       - TEST_NAME=loadtest_fullstack_service_on_aws
     deploy:
-      replicas: 14
+      replicas: 1
       restart_policy:
         condition: on-failure
     command: go run loadtest
