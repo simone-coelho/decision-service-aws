@@ -76,7 +76,7 @@ let config = {
     // GRPC Server
     GRPC_PORT: `0.0.0.0:${process.env.GRPC_PORT || '1337'}`,
     // Websocket Server
-    DATAFILE_SERVER: process.env.DATAFILE_SERVER || 'locahost:2222',
+    DATAFILE_SERVER: process.env.DATAFILE_SERVER || 'localhost:2222',
   },
 };
 
