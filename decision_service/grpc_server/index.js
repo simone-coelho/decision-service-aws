@@ -1,15 +1,14 @@
+require('google-protobuf/google/protobuf/struct_pb')
+const messages = require('./decision_service_pb')
+const services = require('./decision_service_grpc_pb')
 const grpc = require('grpc')
-const path = require('path')
-const protoLoader = require('@grpc/proto-loader')
 
 const optimizely = require('../optimizely/optimizely_manager');
-const packageDefinition = protoLoader.loadSync(path.join(__dirname, '../protos/decision_service.proto'))
-const packageObject = grpc.loadPackageDefinition(packageDefinition)
 
 let grpcServer
 function startServer(address) {
   grpcServer = new grpc.Server()
-  grpcServer.addService(packageObject.Optimizely.DecisionService.service, {
+  grpcServer.addService(services.DecisionServiceService, {
     activate,
     getVariation,
     getFeature
@@ -20,7 +19,16 @@ function startServer(address) {
 }
 
 async function activate(call, callback) {
-  let { experimentKey, userId, userAttributes = {} } = call.request
+  let { request } = call
+
+  // @TODO(mng): use the datafile key for getting the optly instance
+  let { datafile_key } = parseContext(request)
+  let parameters = parseParameters(request)
+  let experimentKey = parameters.getExperimentKey()
+  let userId = parameters.getUserId()
+  let userAttributes = parameters.getUserAttributes()
+  userAttributes = userAttributes ? userAttributes.toJavaScript() : {}
+  
   let optlyInstance = await optimizely.getInstance()
   let variationKey = optlyInstance.activate(experimentKey, userId, userAttributes)
   let response = { variationKey }
@@ -28,19 +36,47 @@ async function activate(call, callback) {
 }
 
 async function getVariation(call, callback) {
-  let { experimentKey, userId, userAttributes = {} } = call.request
+  let { request } = call
+  // @TODO(mng): use the datafile key for getting the optly instance
+  let { datafile_key } = parseContext(request)
+  let parameters = parseParameters(request)
+  let experimentKey = parameters.getExperimentKey()
+  let userId = parameters.getUserId()
+  let userAttributes = parameters.getUserAttributes()
+  userAttributes = userAttributes ? userAttributes.toJavaScript() : {}
+
   let optlyInstance = await optimizely.getInstance()
   let variationKey = optlyInstance.getVariation(experimentKey, userId, userAttributes)
   let response = { variationKey }
   callback(null, response)
 }
 
-async function getFeature(call, callback) {
-  let { featureKey, userId, userAttributes = {} } = call.request
-  let optlyInstance = await optimizely.getInstance()
-  let isEnabled = optlyInstance.isFeatureEnabled(featureKey, userId, userAttributes)
-  let response = { isEnabled }
+async function getFeature(call, callback) {  
+  // @TODO: use the datafile key for getting the optly instance
+  let { datafile_key } = parseContext(request)
+  let parameters = parseParameters(request)
+  let featureKey = parameters.getFeatureKey()
+  let userId = parameters.getUserId()
+  let userAttributes = parameters.getUserAttributes()
+  userAttributes = userAttributes ? userAttributes.toJavaScript() : {}
+
+  // @TODO(mng): Implement
+  let response = new messages.FeatureResponse()
+  response.setIsEnabled(true)
+  response.setVariable(variable)
   callback(null, response)
+}
+
+function parseContext(request) {
+  let context = request.getContext()
+  return {
+    datafile_key: context.getDatafileKey()
+  }
+}
+
+function parseParameters(request) {
+  let parameters = request.getParameters()
+  return parameters
 }
 
 module.exports = {

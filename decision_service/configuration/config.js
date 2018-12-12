@@ -74,7 +74,7 @@ let config = {
     // HTTP Server
     NODE_PORT: process.env.NODE_PORT || 9090,
     // GRPC Server
-    GRPC_PORT: process.env.GRPC_PORT || '0.0.0.0:1337',
+    GRPC_PORT: `0.0.0.0:${process.env.GRPC_PORT || '1337'}`,
     // Websocket Server
     DATAFILE_SERVER: process.env.DATAFILE_SERVER || 'locahost:2222',
   },

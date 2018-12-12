@@ -16,6 +16,7 @@ services:
       - DATAFILE_SERVER=datafile:2222
     ports:
       - "9090:9090"
+      - "1337:1337"
     deploy:
       replicas: 3
       restart_policy:
