@@ -180,9 +180,9 @@ docker-logs-decision:
 # Running a docker stack on AWS
 ###############################################################################
 
-SSH_KEY_PATH = aws/us-east-1-loadtest-keypair.pem
+SSH_KEY_PATH = aws/fullstack-service-keypair.pem
 SSH_TUNNEL_PORT = localhost:2374
-CLUSTER_MANAGER_PUBLIC_DNS = ec2-3-81-174-208.compute-1.amazonaws.com
+CLUSTER_MANAGER_PUBLIC_DNS = ec2-100-27-5-15.compute-1.amazonaws.com
 AWS_DOCKER = docker -H $(SSH_TUNNEL_PORT) # Use this command for remote execution
 
 # First, initiate Docker SSH Tunnel to the cluster manager
