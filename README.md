@@ -62,7 +62,7 @@ Start by opening an ssh connection to the cluster manager:
 
 Once you've successfully opened it, close the ssh connection and open up an SSH tunnel for docker:
 
-      go aws-tunnel
+      make aws-tunnel
 
 This command will display another command which you'll need to run to open the tunnel.
 
