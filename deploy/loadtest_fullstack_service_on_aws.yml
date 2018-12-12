@@ -16,8 +16,9 @@ services:
       - DATAFILE_SERVER=datafile:2222
     ports:
       - "9090:9090"
+      - "1337:1337"
     deploy:
-      replicas: 1
+      replicas: 3
       restart_policy:
         condition: on-failure
   loadtest:
@@ -25,10 +26,14 @@ services:
     depends_on: 
       - decision
     environment:
-      - DECISION_SERVER=decision:9090
+      - DECISION_SERVER
       - DEBUG
+      - RATE
+      - LOADTEST_DURATION_SEC
+      - TEST_NAME
+      - STARTUP_DELAY=0
     deploy:
-      replicas: 1
+      replicas: 20
       restart_policy:
         condition: on-failure
     command: go run loadtest

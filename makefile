@@ -25,8 +25,6 @@ MANAGER_PUBLIC_DNS = ec2-18-209-245-199.compute-1.amazonaws.com
 DOCKER_AWS = docker -H $(TUNNEL_PORT) # Use this command for remote execution
 DOCKER = docker 	 			  # Use this command for local execution
 
-
-
 ### Starting and stopping the dockerized load test
 
 

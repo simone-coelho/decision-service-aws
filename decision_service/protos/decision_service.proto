@@ -1,11 +1,13 @@
 syntax = "proto3";
 
-package Optimizely;
+import "google/protobuf/struct.proto";
 
-import "google/protobuf/any.proto";
+package Optimizely;
 
 service DecisionService {
   rpc Activate(DecisionRequest) returns (DecisionResponse);
+  rpc GetVariation(DecisionRequest) returns (DecisionResponse);
+  rpc GetFeature(FeatureRequest) returns (FeatureResponse);
 }
 
 message DecisionResponse {
@@ -13,17 +15,30 @@ message DecisionResponse {
 }
 
 message DecisionRequest {
-  string experiment_key = 1;
-  string user_id = 2;
-  map<string, string> user_attributes = 3;
+  RequestContext context = 1;
+  message Parameters {   
+    string experiment_key = 1;
+    string user_id = 2;
+    google.protobuf.Struct user_attributes = 3;   
+  }
+  Parameters parameters = 2;
 }
 
 message FeatureRequest {
-  string feature_key = 1;
-  string user_id = 2;
-  map<string, string> user_attributes = 3;
+  RequestContext context = 1;
+  message Parameters {
+    string feature_key = 1;
+    string user_id = 2;
+    map<string, string> user_attributes = 3;
+  }
+  Parameters parameters = 2;
 }
 
 message FeatureResponse {
-  bool is_feature_enabled = 1;
+  bool is_enabled = 1;
+  google.protobuf.Struct config = 2;
+}
+
+message RequestContext {
+  string datafile_key = 1;
 }

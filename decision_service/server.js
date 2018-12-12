@@ -16,7 +16,7 @@ const types = require('./types/types');
 const server_config = require('./configuration/config');
 const PORT = server_config.server.NODE_PORT;
 const grpcServer = require('./grpc_server')
-const GRPC_PORT = server_config.GRPC_PORT
+const GRPC_PORT = server_config.server.GRPC_PORT
 http.createServer(requestListener).listen(PORT);
 
 
