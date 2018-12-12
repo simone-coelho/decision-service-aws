@@ -1,0 +1,12 @@
+version: "3"
+services:
+  loadtest:
+    image: loadtest_service
+    environment:
+      - DECISION_SERVER=decision:9090
+      - DEBUG
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    command: go run loadtest

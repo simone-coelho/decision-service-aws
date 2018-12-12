@@ -22,8 +22,8 @@ MANAGER_PUBLIC_DNS = ec2-18-209-245-199.compute-1.amazonaws.com
 
 # modify this variable to run docker commands remotely via ssh
 # Remote execution requires running "tunnel" first
-DOCKER = docker -H $(TUNNEL_PORT) # Use this command for remote execution
-# DOCKER = docker 	 			  # Use this command for local execution
+DOCKER_AWS = docker -H $(TUNNEL_PORT) # Use this command for remote execution
+DOCKER = docker 	 			  # Use this command for local execution
 
 
 
@@ -42,7 +42,7 @@ build-containers:
 
 # Deploy the services described in docker-compose
 run:
-	$(DOCKER) stack deploy -c docker-compose.yml $(SWARM_APP)
+	$(DOCKER) stack deploy -c deploy/loadtest_fullstack_service_on_local.yml $(SWARM_APP)
 	$(DOCKER) service logs --follow $(LOADTEST_SERVICE)
 
 # Stop the services described in docker-compose

@@ -1,0 +1,34 @@
+version: "3"
+services:
+  datafile:
+    image: datafile_service
+    ports:
+      - "2222:2222"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  decision:
+    image: decision_service
+    depends_on:
+      - datafile
+    environment:
+      - DATAFILE_SERVER=datafile:2222
+    ports:
+      - "9090:9090"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  loadtest:
+    image: loadtest_service
+    depends_on: 
+      - decision
+    environment:
+      - DECISION_SERVER=decision:9090
+      - DEBUG
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    command: go run loadtest
