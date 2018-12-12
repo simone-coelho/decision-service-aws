@@ -1,14 +1,23 @@
 ###############################################################################
-# Deploy with docker
+# Deploy load test with docker
 ###############################################################################
-SWARM_APP = fullstack
-DECISION_SERVICE = $(SWARM_APP)_decision
+
+# TEST_NAME determines which docker-compose config file is used to deploy your
+# test.  Override it with e.g.:  
+#
+# make TEST_NAME="loadtest_cloudfront_from_local" run
+# 
+TEST_NAME = loadtest_fullstack_service_on_local # Override this via e.g. 
+
+DECISION_SERVICE_NAME = decision
 DECISION_CONTAINER = decision_service
 DECISION_DIR = decision_service
-LOADTEST_SERVICE = $(SWARM_APP)_loadtest
+
+LOADTEST_SERVICE_NAME = loadtest_service
 LOADTEST_CONTAINER = loadtest_service
 LOADTEST_DIR = loadtest_service
-DATAFILE_SERVICE = $(SWARM_APP)_datafile
+
+DATAFILE_SERVICE_NAME = datafile_service
 DATAFILE_CONTAINER = datafile_service
 DATAFILE_DIR = datafile_service
 
@@ -39,13 +48,15 @@ build-containers:
 	$(DOCKER) build -t $(LOADTEST_CONTAINER) $(LOADTEST_DIR) 
 
 # Deploy the services described in docker-compose
+# Example: make TEST_NAME="loadtest_cloudfront_from_local" run
 run:
-	$(DOCKER) stack deploy -c deploy/loadtest_fullstack_service_on_local.yml $(SWARM_APP)
-	$(DOCKER) service logs --follow $(LOADTEST_SERVICE)
+	$(DOCKER) stack deploy -c deploy/$(TEST_NAME).yml $(TEST_NAME)
+	$(DOCKER) service logs --follow $(TEST_NAME)_$(LOADTEST_SERVICE_NAME)
 
 # Stop the services described in docker-compose
+# Example: make TEST_NAME="loadtest_cloudfront_from_local" stop
 stop:
-	$(DOCKER) stack rm $(SWARM_APP)
+	$(DOCKER) stack rm $(TEST_NAME)
 
 # Leave the docker swarm (and stop it)
 stop-swarm:

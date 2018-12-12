@@ -3,7 +3,14 @@ services:
   loadtest:
     image: loadtest_service
     environment:
-      - DECISION_SERVER=decision:9090
+      # "localhost:9090" doesn't work, since docker is not configured to resolve the
+      # external localhost from inside the container.  This value should be changed
+      # to point to the cloudflare service
+      - DECISION_SERVER=localhost:9090  
+      - RATE=10
+      - STARTUP_DELAY=0
+      - LOADTEST_DURATION_SEC=10
+      - TEST_NAME=loadtest_cloudfront_from_local
       - DEBUG
     deploy:
       replicas: 1

@@ -18,10 +18,10 @@ const STARTUP_DELAY_ENV = "STARTUP_DELAY"
 const DURATION_ENV = "LOADTEST_DURATION_SEC"
 const TEST_NAME_ENV = "TEST_NAME"
 
-const DEFAULT_LOADTEST_DELAY = 60
+const DEFAULT_LOADTEST_DELAY = 0
 const DEFAULT_DECISION_SERVER = "localhost:9090"
-const DEFAULT_RATE = 100
-const DEFAULT_DURATION = 60
+const DEFAULT_RATE = 10
+const DEFAULT_DURATION = 10
 const DEFAULT_TEST_NAME = "get_variation"
 
 type GlobalParams struct {
@@ -142,6 +142,8 @@ func getGlobalParams() GlobalParams {
   return globalParams
 
 }
+
+
 
 // Use vegeta to run the load test as specified in the passed parameters
 func runLoadTest(testParams LoadTestParams, globalParams GlobalParams) vegeta.Metrics {
