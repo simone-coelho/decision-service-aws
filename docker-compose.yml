@@ -28,6 +28,10 @@ services:
     environment:
       - DECISION_SERVER
       - DEBUG
+      - RATE
+      - LOADTEST_DURATION_SEC
+      - TEST_NAME
+      - STARTUP_DELAY=0
     deploy:
       replicas: 20
       restart_policy:

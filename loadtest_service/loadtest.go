@@ -4,6 +4,8 @@ package main
 
 import (
   "fmt"
+  "io/ioutil"
+  "strconv"
   "time"
   "os"
   vegeta "github.com/tsenart/vegeta/lib"
@@ -11,9 +13,16 @@ import (
 
 const DECISION_SERVER_ENV = "DECISION_SERVER"
 const DEBUG_ENV = "DEBUG"
+const RATE_ENV = "RATE"
+const STARTUP_DELAY_ENV = "STARTUP_DELAY"
+const DURATION_ENV = "LOADTEST_DURATION_SEC"
+const TEST_NAME_ENV = "TEST_NAME"
 
 const DEFAULT_LOADTEST_DELAY = 60
 const DEFAULT_DECISION_SERVER = "localhost:9090"
+const DEFAULT_RATE = 100
+const DEFAULT_DURATION = 60
+const DEFAULT_TEST_NAME = "get_variation"
 
 type GlobalParams struct {
   StartupDelay time.Duration      // Wait this long before starting load tests
@@ -43,17 +52,50 @@ func main() {
   time.Sleep(globalParams.StartupDelay) // todo: be smarter about this
 
   // Initialize the load test parameters
+  rate := DEFAULT_RATE
+  overrideRateStr := os.Getenv(RATE_ENV)
+  if len(overrideRateStr) > 0 {
+    overrideRateInt, err := strconv.Atoi(overrideRateStr)
+    if err != nil {
+      fmt.Printf("Ignoring request to set rate to non-integer %s\n", overrideRateStr)
+    } else {
+      rate = overrideRateInt
+    }
+  }
+
+  duration := DEFAULT_DURATION
+  durationEnvValue := os.Getenv(DURATION_ENV)
+  if len(durationEnvValue) > 0 {
+    durationInt, err := strconv.Atoi(durationEnvValue)
+    if err != nil {
+      fmt.Printf("Ignoring request to set rate to non-integer %s\n", durationEnvValue)
+    } else {
+      duration = durationInt
+    }
+  }
+
+  testName := DEFAULT_TEST_NAME
+  testNameEnvValue := os.Getenv(TEST_NAME_ENV)
+  if len(testNameEnvValue) > 0 {
+    testName = testNameEnvValue
+  }
+  b, err := ioutil.ReadFile(fmt.Sprintf("/res/tests/%s.json", testName))
+  if err != nil {
+    panic(err)
+  }
+  body := string(b)
+
   testParams := LoadTestParams{
     Requests: []RequestParams{
                   RequestParams{
                     Method: "POST",
                     Path: "/rpc",
-                    Body: "{ \"get_variation\": { \"datafile_key\":\"DjJKKrG8NnRhSLRVvX8VS8\", \"experiment_key\":\"simple_test\", \"user_id\":\"%d\", \"attributes\": {\"test_user\":\"true\"} } }",
+                    Body: body,
                   },
     },
     NumUsers: 50,
-    RequestsPerSecond: 100,
-    Duration: 60 * time.Second,
+    RequestsPerSecond: rate,
+    Duration: time.Duration(duration) * time.Second,
   }
 
   // Print the test parameters
@@ -75,6 +117,16 @@ func getGlobalParams() GlobalParams {
     StartupDelay: DEFAULT_LOADTEST_DELAY * time.Second,
     TargetServer: DEFAULT_DECISION_SERVER,
     Debug: false,
+  }
+
+  startupDelayEnvValue := os.Getenv(STARTUP_DELAY_ENV)
+  if len(startupDelayEnvValue) > 0 {
+    overrideStartupDelay, err := strconv.Atoi(startupDelayEnvValue)
+    if err != nil {
+      fmt.Printf("Failed to parse STARTUP_DELAY_ENV to int: %s\n", startupDelayEnvValue)
+    } else {
+      globalParams.StartupDelay = time.Duration(overrideStartupDelay) * time.Second
+    }
   }
 
   targetServerValue := os.Getenv(DECISION_SERVER_ENV)
