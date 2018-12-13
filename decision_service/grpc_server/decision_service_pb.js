@@ -769,7 +769,8 @@ proto.Optimizely.FeatureRequest.Parameters.toObject = function(includeInstance, 
   var f, obj = {
     featureKey: jspb.Message.getFieldWithDefault(msg, 1, ""),
     userId: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    userAttributesMap: (f = msg.getUserAttributesMap()) ? f.toObject(includeInstance, undefined) : []
+    userAttributes: (f = msg.getUserAttributes()) && google_protobuf_struct_pb.Struct.toObject(includeInstance, f),
+    variableKeysMap: (f = msg.getVariableKeysMap()) ? f.toObject(includeInstance, undefined) : []
   };
 
   if (includeInstance) {
@@ -815,7 +816,12 @@ proto.Optimizely.FeatureRequest.Parameters.deserializeBinaryFromReader = functio
       msg.setUserId(value);
       break;
     case 3:
-      var value = msg.getUserAttributesMap();
+      var value = new google_protobuf_struct_pb.Struct;
+      reader.readMessage(value,google_protobuf_struct_pb.Struct.deserializeBinaryFromReader);
+      msg.setUserAttributes(value);
+      break;
+    case 4:
+      var value = msg.getVariableKeysMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString);
          });
@@ -863,9 +869,17 @@ proto.Optimizely.FeatureRequest.Parameters.serializeBinaryToWriter = function(me
       f
     );
   }
-  f = message.getUserAttributesMap(true);
+  f = message.getUserAttributes();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      google_protobuf_struct_pb.Struct.serializeBinaryToWriter
+    );
+  }
+  f = message.getVariableKeysMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(3, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
   }
 };
 
@@ -901,20 +915,50 @@ proto.Optimizely.FeatureRequest.Parameters.prototype.setUserId = function(value)
 
 
 /**
- * map<string, string> user_attributes = 3;
+ * optional google.protobuf.Struct user_attributes = 3;
+ * @return {?proto.google.protobuf.Struct}
+ */
+proto.Optimizely.FeatureRequest.Parameters.prototype.getUserAttributes = function() {
+  return /** @type{?proto.google.protobuf.Struct} */ (
+    jspb.Message.getWrapperField(this, google_protobuf_struct_pb.Struct, 3));
+};
+
+
+/** @param {?proto.google.protobuf.Struct|undefined} value */
+proto.Optimizely.FeatureRequest.Parameters.prototype.setUserAttributes = function(value) {
+  jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+proto.Optimizely.FeatureRequest.Parameters.prototype.clearUserAttributes = function() {
+  this.setUserAttributes(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.Optimizely.FeatureRequest.Parameters.prototype.hasUserAttributes = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
+/**
+ * map<string, string> variable_keys = 4;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
-proto.Optimizely.FeatureRequest.Parameters.prototype.getUserAttributesMap = function(opt_noLazyCreate) {
+proto.Optimizely.FeatureRequest.Parameters.prototype.getVariableKeysMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 3, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
       null));
 };
 
 
-proto.Optimizely.FeatureRequest.Parameters.prototype.clearUserAttributesMap = function() {
-  this.getUserAttributesMap().clear();
+proto.Optimizely.FeatureRequest.Parameters.prototype.clearVariableKeysMap = function() {
+  this.getVariableKeysMap().clear();
 };
 
 

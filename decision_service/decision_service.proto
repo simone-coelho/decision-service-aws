@@ -29,7 +29,8 @@ message FeatureRequest {
   message Parameters {
     string feature_key = 1;
     string user_id = 2;
-    map<string, string> user_attributes = 3;
+    google.protobuf.Struct user_attributes = 3;
+    map<string, string> variable_keys = 4;
   }
   Parameters parameters = 2;
 }
