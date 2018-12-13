@@ -11,7 +11,8 @@ function startServer(address) {
   grpcServer.addService(services.DecisionServiceService, {
     activate,
     getVariation,
-    getFeature
+    getFeature,
+    getFeatureVariableString
   })
   grpcServer.bind(address, grpc.ServerCredentials.createInsecure())
   grpcServer.start()
@@ -85,7 +86,26 @@ async function getFeature(call, callback) {
   
   let response = new messages.FeatureResponse()
   response.setIsEnabled(isFeatureEnabled)
-  response.setConfig(Struct.fromJavaScript(config))
+  if (Object.keys(config).length) {
+    response.setConfig(Struct.fromJavaScript(config))
+  }
+  callback(null, response)
+}
+
+async function getFeatureVariableString(call, callback) {
+  let { request } = call 
+  let { datafile_key } = parseContext(request)
+  let parameters = parseParameters(request)
+  let featureKey = parameters.getFeatureKey()
+  let variableKey = parameters.getVariableKey()
+  let userId = parameters.getUserId()
+  let userAttributes = parameters.getUserAttributes()
+  userAttributes = userAttributes ? userAttributes.toJavaScript() : {}
+
+  let optlyInstance = await optimizely.getInstance(datafile_key)
+  let variableValue = optlyInstance.getFeatureVariableString(featureKey, variableKey, userId, userAttributes)
+  let response = new messages.FeatureVariableStringResponse()
+  response.setValue(variableValue)
   callback(null, response)
 }
 

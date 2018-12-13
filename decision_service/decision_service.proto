@@ -8,6 +8,7 @@ service DecisionService {
   rpc Activate(DecisionRequest) returns (DecisionResponse);
   rpc GetVariation(DecisionRequest) returns (DecisionResponse);
   rpc GetFeature(FeatureRequest) returns (FeatureResponse);
+  rpc GetFeatureVariableString(FeatureVariableStringRequest) returns (FeatureVariableStringResponse);
 }
 
 message DecisionResponse {
@@ -38,6 +39,21 @@ message FeatureRequest {
 message FeatureResponse {
   bool is_enabled = 1;
   google.protobuf.Struct config = 2;
+}
+
+message FeatureVariableStringRequest {
+  RequestContext context = 1;
+  message Parameters {
+    string feature_key = 1;
+    string variable_key = 2;
+    string user_id = 3;
+    google.protobuf.Struct user_attributes = 4;
+  }
+  Parameters parameters = 2;
+}
+
+message FeatureVariableStringResponse {
+  string value = 1;
 }
 
 message RequestContext {
