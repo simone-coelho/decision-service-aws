@@ -10,6 +10,7 @@
     "async-redis": "^1.1.4",
     "google-protobuf": "^3.6.1",
     "grpc": "^1.16.1",
+    "grpc-tools": "^1.6.6",
     "node-fetch": "^2.3.0",
     "node-schedule": "^1.3.0",
     "reconnecting-websocket": "^4.1.10",
@@ -21,6 +22,7 @@
   "devDependencies": {},
   "scripts": {
     "dev": "forever -w server.js",
+    "generate-proto": "grpc_tools_node_protoc --js_out=import_style=commonjs,binary:grpc_server/ --grpc_out=grpc_server/ --plugin=protoc-gen-grpc=`which grpc_tools_node_protoc_plugin` decision_service.proto",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

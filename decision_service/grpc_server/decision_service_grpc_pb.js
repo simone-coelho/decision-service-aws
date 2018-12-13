@@ -49,6 +49,28 @@ function deserialize_Optimizely_FeatureResponse(buffer_arg) {
   return decision_service_pb.FeatureResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_Optimizely_FeatureVariableStringRequest(arg) {
+  if (!(arg instanceof decision_service_pb.FeatureVariableStringRequest)) {
+    throw new Error('Expected argument of type Optimizely.FeatureVariableStringRequest');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_Optimizely_FeatureVariableStringRequest(buffer_arg) {
+  return decision_service_pb.FeatureVariableStringRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_Optimizely_FeatureVariableStringResponse(arg) {
+  if (!(arg instanceof decision_service_pb.FeatureVariableStringResponse)) {
+    throw new Error('Expected argument of type Optimizely.FeatureVariableStringResponse');
+  }
+  return new Buffer(arg.serializeBinary());
+}
+
+function deserialize_Optimizely_FeatureVariableStringResponse(buffer_arg) {
+  return decision_service_pb.FeatureVariableStringResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 
 var DecisionServiceService = exports.DecisionServiceService = {
   activate: {
@@ -83,6 +105,17 @@ var DecisionServiceService = exports.DecisionServiceService = {
     requestDeserialize: deserialize_Optimizely_FeatureRequest,
     responseSerialize: serialize_Optimizely_FeatureResponse,
     responseDeserialize: deserialize_Optimizely_FeatureResponse,
+  },
+  getFeatureVariableString: {
+    path: '/Optimizely.DecisionService/GetFeatureVariableString',
+    requestStream: false,
+    responseStream: false,
+    requestType: decision_service_pb.FeatureVariableStringRequest,
+    responseType: decision_service_pb.FeatureVariableStringResponse,
+    requestSerialize: serialize_Optimizely_FeatureVariableStringRequest,
+    requestDeserialize: deserialize_Optimizely_FeatureVariableStringRequest,
+    responseSerialize: serialize_Optimizely_FeatureVariableStringResponse,
+    responseDeserialize: deserialize_Optimizely_FeatureVariableStringResponse,
   },
 };
 

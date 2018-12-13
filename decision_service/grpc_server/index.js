@@ -1,4 +1,4 @@
-require('google-protobuf/google/protobuf/struct_pb')
+const { Struct } = require('google-protobuf/google/protobuf/struct_pb')
 const messages = require('./decision_service_pb')
 const services = require('./decision_service_grpc_pb')
 const grpc = require('grpc')
@@ -11,7 +11,8 @@ function startServer(address) {
   grpcServer.addService(services.DecisionServiceService, {
     activate,
     getVariation,
-    getFeature
+    getFeature,
+    getFeatureVariableString
   })
   grpcServer.bind(address, grpc.ServerCredentials.createInsecure())
   grpcServer.start()
@@ -20,24 +21,23 @@ function startServer(address) {
 
 async function activate(call, callback) {
   let { request } = call
-
-  // @TODO(mng): use the datafile key for getting the optly instance
   let { datafile_key } = parseContext(request)
   let parameters = parseParameters(request)
   let experimentKey = parameters.getExperimentKey()
   let userId = parameters.getUserId()
   let userAttributes = parameters.getUserAttributes()
   userAttributes = userAttributes ? userAttributes.toJavaScript() : {}
-  
-  let optlyInstance = await optimizely.getInstance()
+
+  let optlyInstance = await optimizely.getInstance(datafile_key)
   let variationKey = optlyInstance.activate(experimentKey, userId, userAttributes)
-  let response = { variationKey }
+  
+  let response = new messages.DecisionResponse()
+  response.setVariationKey(variationKey)
   callback(null, response)
 }
 
 async function getVariation(call, callback) {
   let { request } = call
-  // @TODO(mng): use the datafile key for getting the optly instance
   let { datafile_key } = parseContext(request)
   let parameters = parseParameters(request)
   let experimentKey = parameters.getExperimentKey()
@@ -45,25 +45,67 @@ async function getVariation(call, callback) {
   let userAttributes = parameters.getUserAttributes()
   userAttributes = userAttributes ? userAttributes.toJavaScript() : {}
 
-  let optlyInstance = await optimizely.getInstance()
+  let optlyInstance = await optimizely.getInstance(datafile_key)
   let variationKey = optlyInstance.getVariation(experimentKey, userId, userAttributes)
   let response = { variationKey }
   callback(null, response)
 }
 
-async function getFeature(call, callback) {  
-  // @TODO: use the datafile key for getting the optly instance
+async function getFeature(call, callback) {
+  let { request } = call 
   let { datafile_key } = parseContext(request)
   let parameters = parseParameters(request)
   let featureKey = parameters.getFeatureKey()
   let userId = parameters.getUserId()
   let userAttributes = parameters.getUserAttributes()
   userAttributes = userAttributes ? userAttributes.toJavaScript() : {}
-
-  // @TODO(mng): Implement
+  let variableKeys = parameters.getVariableKeysMap() || new Map()
+  
+  console.log('Params', datafile_key, featureKey, userId, userAttributes, variableKeys)
+  let optlyInstance = await optimizely.getInstance(datafile_key)
+  let isFeatureEnabled = optlyInstance.isFeatureEnabled(featureKey, userId, userAttributes)  
+  let config = {}
+  variableKeys.forEach((variableType, variableKey) => {
+    let variableValue
+    switch (variableType) {
+      case 'string':
+      variableValue = optlyInstance.getFeatureVariableString(featureKey, variableKey, userId, userAttributes)
+      break
+      case 'boolean':
+      variableValue = optlyInstance.getFeatureVariableBoolean(featureKey, variableKey, userId, userAttributes)
+      break
+      case 'integer':
+      variableValue = optlyInstance.getFeatureVariableInteger(featureKey, variableKey, userId, userAttributes)
+      break
+      case 'double': 
+      variableValue = optlyInstance.getFeatureVariableDouble(featureKey, variableKey, userId, userAttributes)
+      break
+    }
+    config[variableKey] = variableValue
+  })
+  
   let response = new messages.FeatureResponse()
-  response.setIsEnabled(true)
-  response.setVariable(variable)
+  response.setIsEnabled(isFeatureEnabled)
+  if (Object.keys(config).length) {
+    response.setConfig(Struct.fromJavaScript(config))
+  }
+  callback(null, response)
+}
+
+async function getFeatureVariableString(call, callback) {
+  let { request } = call 
+  let { datafile_key } = parseContext(request)
+  let parameters = parseParameters(request)
+  let featureKey = parameters.getFeatureKey()
+  let variableKey = parameters.getVariableKey()
+  let userId = parameters.getUserId()
+  let userAttributes = parameters.getUserAttributes()
+  userAttributes = userAttributes ? userAttributes.toJavaScript() : {}
+
+  let optlyInstance = await optimizely.getInstance(datafile_key)
+  let variableValue = optlyInstance.getFeatureVariableString(featureKey, variableKey, userId, userAttributes)
+  let response = new messages.FeatureVariableStringResponse()
+  response.setValue(variableValue)
   callback(null, response)
 }
 
