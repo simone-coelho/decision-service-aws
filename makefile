@@ -19,7 +19,7 @@ DOCKER = docker 	 			  # Use this command for local execution
 # DEPLOY_CONFIG determines which docker-compose config file is used to deploy your
 # test.  Override it with e.g.:  
 # 	make DEPLOY_CONFIG="loadtest_cloudfront_from_local" docker-deploy-stack
-DEPLOY_CONFIG = loadtest_fullstack_service_on_local
+DEPLOY_CONFIG = fullstack_service_on_local
 
 ###############################################################################
 # Datafile Service
@@ -146,7 +146,6 @@ docker-build-containers: docker-build-loadtest docker-build-datafile docker-buil
 # Example: make DEPLOY_CONFIG="loadtest_cloudfront_from_local" docker-deploy-stack
 docker-deploy-stack:
 	$(DOCKER) stack deploy -c deploy/$(DEPLOY_CONFIG).yml $(DEPLOY_CONFIG)
-	$(DOCKER) service logs --follow $(DEPLOY_CONFIG)_$(LOADTEST_SERVICE_NAME)
 
 # Use this to stop the stack specified in the $DEPLOY_CONFIG docker compose file
 # Example: make DEPLOY_CONFIG="loadtest_cloudfront_from_local" docker-stop-stack
