@@ -1,0 +1,18 @@
+version: "3"
+services:
+  datafile:
+    image: datafile_service
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+  decision:
+    image: decision_service
+    depends_on:
+      - datafile
+    environment:
+      - DATAFILE_SERVER=datafile:2222
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
