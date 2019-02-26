@@ -1,6 +1,6 @@
 # Load testing a node decision service
 
-Use this repo to run [Simone's Nodejs Decision Service](https://github.com/simone-coelho/decision-service) as a set of independently scalable services, collectively known as a "fullstack service".  
+Use this repo to run [Simone's Nodejs Decision Service](https://github.com/simone-coelho/decision-service/tree/multi-tenant-filemgr) as a set of independently scalable services, collectively known as a "fullstack service".  
 
 # Running the service locally
 
