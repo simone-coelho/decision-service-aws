@@ -4,7 +4,7 @@
   "description": "Node.js RPC based decision service for full stack SDK",
   "main": "server.js",
   "dependencies": {
-    "@grpc/grpc-js": "^0.3.2",
+    "@grpc/grpc-js": "^1.1.8",
     "@optimizely/optimizely-sdk": "^2.3.1",
     "ajv": "^6.5.5",
     "async-redis": "^1.1.4",
