@@ -6,7 +6,7 @@
   "dependencies": {
     "@grpc/grpc-js": "^0.3.2",
     "@optimizely/optimizely-sdk": "^2.3.1",
-    "ajv": "^6.5.5",
+    "ajv": "^6.12.3",
     "async-redis": "^1.1.4",
     "google-protobuf": "^3.6.1",
     "grpc": "^1.16.1",
