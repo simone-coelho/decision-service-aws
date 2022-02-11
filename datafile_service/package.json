@@ -4,7 +4,7 @@
   "private": true,
   "main": "server.js",
   "dependencies": {
-    "ajv": "^6.6.1",
+    "ajv": "^6.12.3",
     "body-parser": "^1.18.3",
     "debug": "~2.6.9",
     "http-errors": "~1.6.2",
